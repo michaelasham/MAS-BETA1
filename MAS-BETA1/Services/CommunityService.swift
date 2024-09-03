@@ -658,14 +658,31 @@ class CommunityService {
         }
     }
     
-    func scanTicket(ticket: Ticket) {
-        let formatter : DateFormatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
-        let dateStr : String = formatter.string(from: NSDate.init(timeIntervalSinceNow: 0) as Date)
-           
-        ref.child("tickets").child(ticket.id).updateChildValues([
-            "scanned": dateStr
-        ])
+    func scanTicket(user: User, completion: @escaping CompletionHandler) {
+        var flag = false
+        for ticket in tickets {
+            if ticket.event.id == selectedEvent.id && ticket.userID == user.id {
+                flag = true
+                let formatter : DateFormatter = DateFormatter()
+                formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+                let dateStr : String = formatter.string(from: NSDate.init(timeIntervalSinceNow: 0) as Date)
+                   
+                ref.child("tickets").child(ticket.id).updateChildValues([
+                    "scanned": dateStr
+                ])
+                completion(true)
+            }
+        }
+        completion(flag)
+    }
+    
+    func checkIfTicketIsScanned(user: User) -> Bool {
+        for ticket in tickets {
+            if ticket.event.id == selectedEvent.id && ticket.userID == user.id {
+                return ticket.scanned != ""
+            }
+        }
+        return false
     }
     
     func isThereAnOpenMeeting() -> Bool {

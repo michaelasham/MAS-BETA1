@@ -517,6 +517,7 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="person.text.rectangle" catalog="system"/>
                                 <connections>
+                                    <action selector="onPassClick:" destination="rdY-hT-JHm" eventType="touchUpInside" id="NPh-0i-fCL"/>
                                     <action selector="onWalletClick:" destination="rdY-hT-JHm" eventType="touchUpInside" id="vZO-wi-bgh"/>
                                 </connections>
                             </button>
@@ -531,6 +532,21 @@
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="t19-s8-owP">
                                 <rect key="frame" x="193" y="90" width="20" height="20"/>
                             </activityIndicatorView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FX2-lY-yZA" customClass="CircleButton" customModule="MAS_BETA1" customModuleProvider="target">
+                                <rect key="frame" x="313" y="239" width="60" height="60"/>
+                                <color key="backgroundColor" red="0.042247950139999997" green="0.10936450020000001" blue="0.54009763160000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="U8m-B7-tbq"/>
+                                    <constraint firstAttribute="width" constant="60" id="nY6-aN-3tt"/>
+                                </constraints>
+                                <color key="tintColor" red="0.95686274510000002" green="0.95686274510000002" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" image="doc" catalog="system"/>
+                                <connections>
+                                    <action selector="onScoutCVClick:" destination="rdY-hT-JHm" eventType="touchUpInside" id="hMz-Vo-kcT"/>
+                                    <action selector="onWalletClick:" destination="rdY-hT-JHm" eventType="touchUpInside" id="7Xv-Ju-IH7"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="khz-Lq-zm2"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -550,16 +566,19 @@
                             <constraint firstItem="xub-dV-vPP" firstAttribute="centerY" secondItem="1ZC-AV-cJl" secondAttribute="centerY" id="d4l-zj-hoJ"/>
                             <constraint firstItem="gTI-RJ-OlM" firstAttribute="top" secondItem="Sha-If-IKN" secondAttribute="bottom" constant="5" id="dM5-Yh-ieT"/>
                             <constraint firstItem="gTI-RJ-OlM" firstAttribute="leading" secondItem="khz-Lq-zm2" secondAttribute="leading" constant="20" id="enQ-NL-0Hu"/>
+                            <constraint firstItem="khz-Lq-zm2" firstAttribute="trailing" secondItem="FX2-lY-yZA" secondAttribute="trailing" constant="20" id="kHk-ro-7s7"/>
                             <constraint firstItem="1ZC-AV-cJl" firstAttribute="top" secondItem="khz-Lq-zm2" secondAttribute="top" constant="30" id="ozP-iq-2mN"/>
                             <constraint firstItem="5vy-Zi-35k" firstAttribute="top" secondItem="Dzb-Vs-SfP" secondAttribute="bottom" constant="20" id="rof-Sf-V7G"/>
                             <constraint firstItem="khz-Lq-zm2" firstAttribute="trailing" secondItem="gTI-RJ-OlM" secondAttribute="trailing" constant="20" id="soo-YJ-pka"/>
                             <constraint firstItem="khz-Lq-zm2" firstAttribute="trailing" secondItem="Sha-If-IKN" secondAttribute="trailing" constant="20" id="tad-aS-jxv"/>
+                            <constraint firstItem="FX2-lY-yZA" firstAttribute="top" secondItem="5vy-Zi-35k" secondAttribute="bottom" constant="20" id="uem-cZ-U2H"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Profile" image="person.crop.circle" catalog="system" id="Bw3-4V-1lK"/>
                     <connections>
                         <outlet property="addImageBtn" destination="xub-dV-vPP" id="Ku1-zc-taW"/>
                         <outlet property="collectionView" destination="Upz-Lj-hHA" id="rkn-T4-4Px"/>
+                        <outlet property="cvBtn" destination="FX2-lY-yZA" id="PNz-M4-bmp"/>
                         <outlet property="nameLbl" destination="Sha-If-IKN" id="ItD-rr-5H4"/>
                         <outlet property="profile" destination="1ZC-AV-cJl" id="BeV-q5-SYR"/>
                         <outlet property="qrCodeBtn" destination="Dzb-Vs-SfP" id="DhC-6n-GDK"/>
@@ -1918,6 +1937,62 @@
             </objects>
             <point key="canvasLocation" x="4708" y="-1559"/>
         </scene>
+        <!--View Controller-->
+        <scene sceneID="HTk-mT-tF8">
+            <objects>
+                <viewController id="yaA-C4-4rg" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="vCQ-6l-e1u">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Btg-bv-0vG" customClass="BorderView" customModule="MAS_BETA1" customModuleProvider="target">
+                                <rect key="frame" x="20" y="109" width="353" height="55"/>
+                                <subviews>
+                                    <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Game Name" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="LKh-a9-DPT">
+                                        <rect key="frame" x="6" y="6" width="341" height="43"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="LKh-a9-DPT" secondAttribute="bottom" constant="6" id="3Cl-IU-6cP"/>
+                                    <constraint firstAttribute="trailing" secondItem="LKh-a9-DPT" secondAttribute="trailing" constant="6" id="Ckr-gb-MAn"/>
+                                    <constraint firstAttribute="height" constant="55" id="LHD-4N-7MA"/>
+                                    <constraint firstItem="LKh-a9-DPT" firstAttribute="top" secondItem="Btg-bv-0vG" secondAttribute="top" constant="6" id="Ykc-45-lBc"/>
+                                    <constraint firstItem="LKh-a9-DPT" firstAttribute="leading" secondItem="Btg-bv-0vG" secondAttribute="leading" constant="6" id="xyi-Wm-iHx"/>
+                                </constraints>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EaP-NG-ifV" customClass="BorderButton" customModule="MAS_BETA1" customModuleProvider="target">
+                                <rect key="frame" x="20" y="743" width="353" height="55"/>
+                                <color key="backgroundColor" red="0.042247950139999997" green="0.10936450020000001" blue="0.54009763160000002" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="55" id="yX7-V4-Wii"/>
+                                </constraints>
+                                <color key="tintColor" systemColor="systemBackgroundColor"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Upload"/>
+                                <connections>
+                                    <action selector="onUploadClick:" destination="cmQ-fp-8u6" eventType="touchUpInside" id="Gfh-Td-bxH"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Hb0-cl-fMY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Hb0-cl-fMY" firstAttribute="trailing" secondItem="EaP-NG-ifV" secondAttribute="trailing" constant="20" id="DUJ-LP-7Dn"/>
+                            <constraint firstItem="Btg-bv-0vG" firstAttribute="leading" secondItem="Hb0-cl-fMY" secondAttribute="leading" constant="20" id="IgF-fM-Jf5"/>
+                            <constraint firstItem="EaP-NG-ifV" firstAttribute="leading" secondItem="vCQ-6l-e1u" secondAttribute="leading" constant="20" id="LSi-bt-AxN"/>
+                            <constraint firstItem="Btg-bv-0vG" firstAttribute="top" secondItem="Hb0-cl-fMY" secondAttribute="top" constant="50" id="j30-ab-XCO"/>
+                            <constraint firstItem="Hb0-cl-fMY" firstAttribute="bottom" secondItem="EaP-NG-ifV" secondAttribute="bottom" constant="20" id="vUU-BF-ds3"/>
+                            <constraint firstItem="Hb0-cl-fMY" firstAttribute="trailing" secondItem="Btg-bv-0vG" secondAttribute="trailing" constant="20" id="zIF-Xi-Z1a"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="auP-Ut-Gyn" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5682" y="-1737"/>
+        </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="Aa7-5I-U8e">
             <objects>
@@ -2577,8 +2652,14 @@
         <designable name="Dzb-Vs-SfP">
             <size key="intrinsicContentSize" width="49" height="34.333333333333336"/>
         </designable>
+        <designable name="EaP-NG-ifV">
+            <size key="intrinsicContentSize" width="78.666666666666671" height="38.333333333333336"/>
+        </designable>
         <designable name="F7o-to-IHr">
             <size key="intrinsicContentSize" width="48.333333333333336" height="34.333333333333336"/>
+        </designable>
+        <designable name="FX2-lY-yZA">
+            <size key="intrinsicContentSize" width="47.333333333333336" height="34.333333333333336"/>
         </designable>
         <designable name="KdA-fg-rCp">
             <size key="intrinsicContentSize" width="19.666666666666664" height="20.333333333333332"/>
@@ -2635,6 +2716,7 @@
         <image name="book" catalog="system" width="128" height="99"/>
         <image name="camera" catalog="system" width="128" height="93"/>
         <image name="cross" catalog="system" width="128" height="116"/>
+        <image name="doc" catalog="system" width="115" height="128"/>
         <image name="gear" catalog="system" width="128" height="122"/>
         <image name="hand.thumbsdown" catalog="system" width="123" height="128"/>
         <image name="hand.thumbsup" catalog="system" width="123" height="128"/>

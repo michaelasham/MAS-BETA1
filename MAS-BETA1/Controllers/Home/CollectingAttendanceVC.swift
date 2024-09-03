@@ -19,6 +19,8 @@ class CollectingAttendanceVC: UIViewController, AVCaptureMetadataOutputObjectsDe
     var lastNotificationTime: Date? // Variable to track the last notification time
     let notificationTimeout: TimeInterval = 5.0
     
+    let selectedMode = CommunityService.instance.attendanceMode
+    
     let storage = Storage.storage()
     let storageRef = Storage.storage().reference()
     
@@ -41,10 +43,14 @@ class CollectingAttendanceVC: UIViewController, AVCaptureMetadataOutputObjectsDe
         switch status {
         case "ok":
             notificationView.backgroundColor = .green
-            comment = "\(patrol.members.count - count) more members left for \(patrol.name!) to be fully present"
+            if selectedMode == "meeting" {
+                comment = "\(patrol.members.count - count) more members left for \(patrol.name!) to be fully present"
+            } else {
+                comment = "ticket found and stamped on the system!"
+            }
         case "repeat":
             notificationView.backgroundColor = .yellow
-            comment = "You have already clocked-in before"
+            comment = "You have already scanned before"
         case "invalid":
             notificationView.backgroundColor = .red
             notificationView.titleLabel.text = "INVALID CODE"
@@ -203,17 +209,36 @@ class CollectingAttendanceVC: UIViewController, AVCaptureMetadataOutputObjectsDe
                 // Check if enough time has passed since the last notification
                 if shouldTriggerNotification() {
                     let user = CommunityService.instance.queryUser(UserID: stringValue)
-                    if CommunityService.instance.didMemberClockInBefore(user: user) {
-                        triggerNotification(user: user, status: "repeat")
+                    if selectedMode == "meeting" {
+                        if CommunityService.instance.didMemberClockInBefore(user: user) {
+                            triggerNotification(user: user, status: "repeat")
+                        } else {
+                            CommunityService.instance.clockInMember(id: user.id) { Success in
+                                if Success {
+                                    self.triggerNotification(user: user, status: "ok")
+                                } else {
+                                    self.triggerNotification(user: user, status: "invalid")
+                                }
+                            }
+                        }
                     } else {
-                        CommunityService.instance.clockInMember(id: user.id) { Success in
-                            if Success {
-                                self.triggerNotification(user: user, status: "ok")
-                            } else {
-                                self.triggerNotification(user: user, status: "invalid")
+                        //ticket
+                        if CommunityService.instance.checkIfTicketIsScanned(user: user) {
+                            //scanned
+                            triggerNotification(user: user, status: "repeat")
+                        } else {
+                            CommunityService.instance.scanTicket(user: user) { Success in
+                                if Success {
+                                    self.triggerNotification(user: user, status: "ok")
+
+                                } else {
+                                    self.triggerNotification(user: user, status: "invalid")
+
+                                }
                             }
                         }
                     }
+
                     lastNotificationTime = Date() // Update the last notification time
                 }
             }
