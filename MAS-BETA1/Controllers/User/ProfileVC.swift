@@ -1,4 +1,4 @@
-//
+
 //  ProfileVC.swift
 //  MAS-BETA
 //
@@ -7,10 +7,13 @@
 
 import UIKit
 import FirebaseStorage
+import PDFKit
+import PassKit
 
 class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     
+    @IBOutlet weak var cvBtn: CircleButton!
     @IBOutlet weak var profile: CircleImageView!
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     @IBOutlet weak var qrCodeBtn: CircleButton!
@@ -20,6 +23,7 @@ class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewD
     @IBOutlet weak var addImageBtn: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
     
+    @IBOutlet weak var CVBtn: CircleButton!
     let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     let storage = Storage.storage()
     let storageRef = Storage.storage().reference()
@@ -36,7 +40,6 @@ class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewD
         collectionView.dataSource = self
         imagePicker.delegate = self
         setupView()
-        
     }
     func setupView() {
         if AuthService.instance.isLoggedIn {
@@ -191,4 +194,136 @@ class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewD
         }
     }
     
+    func createScoutCV() {
+        let pageSize = CGRect(x: 0, y: 0, width: 595, height: 842) // A4 size in points
+
+        // Start a PDF context
+        let documentPath = getDocumentsDirectory().appendingPathComponent("ScoutCV.pdf")
+        UIGraphicsBeginPDFContextToFile(documentPath.path, pageSize, nil)
+        UIGraphicsBeginPDFPageWithInfo(pageSize, nil)
+        
+    
+         let user = UserDataService.instance.user
+         let name = user.name ?? "Name not available"
+         let userID = user.id ?? "ID not available"
+         let userBirthDate = user.dateOfBirth ?? "Date of birth not available"
+         let userPhone = user.phone ?? "Phone number not available"
+         
+         let profileText = """
+         Name: \(name)
+         ID: \(userID)
+         Birth Date: \(userBirthDate)
+         Phone Number: \(userPhone)
+         """
+        
+        drawText(name, in: CGRect(x: 50, y: 50, width: pageSize.width - 100, height: 30), fontSize: 20, bold: true)
+        drawText("Scout CV", in: CGRect(x: 50, y: 70, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+        
+        drawText("Personal Details", in: CGRect(x: 50, y: 100, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+       
+            drawText("Date of birth:", in: CGRect(x: 50, y: 120, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+            drawText("Place of birth:", in: CGRect(x: 50, y: 135, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+            drawText("Nationality:", in: CGRect(x: 50, y: 150, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+            drawText("Marital status:", in: CGRect(x: 50, y: 165, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+            drawText("Military status:", in: CGRect(x: 50, y: 180, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+        
+        drawText("Contact Info", in: CGRect(x: 350, y: 100, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+       
+            drawText("Address:", in: CGRect(x: 350, y: 120, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+            drawText("Phone: \(userPhone)", in: CGRect(x: 350, y: 135, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+            drawText("E-mail:", in: CGRect(x: 350, y: 150, width: pageSize.width - 100, height: 30), fontSize: 10, bold: false)
+          
+        
+        // Scout Experience - Assuming you have an array or similar structure
+        drawText("Scout Experience", in: CGRect(x: 50, y: 200, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+        // You need to loop through experiences and draw each
+        // Example: drawText(experience.description, in: CGRect(...))
+        
+        // Education
+        drawText("Achievements & Badges", in: CGRect(x: 50, y: 240, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+        // Loop through education entries if available
+        
+        // Education
+        drawText("Education", in: CGRect(x: 50, y: 280, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+        // Loop through education entries if available
+        
+        // Skills
+        drawText("Skills", in: CGRect(x: 50, y: 320, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+        // Loop through skills
+        
+        // Languages
+        drawText("Languages", in: CGRect(x: 50, y: 360, width: pageSize.width - 100, height: 30), fontSize: 15, bold: true)
+        // Loop through languages
+        
+        // End the PDF context
+        UIGraphicsEndPDFContext()
+        
+        print("Scout CV PDF has been saved to: \(documentPath.path)")
+        displayPDFDocument(path: documentPath)
+    }
+
+    private func getDocumentsDirectory() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+    
+    var pdfURL: URL?  // Property to store the PDF URL
+
+    func displayPDFDocument(path: URL) {
+        let pdfViewController = UIViewController()
+        let pdfView = PDFView(frame: pdfViewController.view.bounds)
+        pdfView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        pdfView.autoScales = true
+        pdfViewController.view.addSubview(pdfView)
+
+        if let document = PDFDocument(url: path) {
+            pdfView.document = document
+        }
+
+        // Setup the navigation controller and buttons
+        let navController = UINavigationController(rootViewController: pdfViewController)
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissPDFViewer))
+        let shareButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(sharePDF(_:)))
+        
+        // Assigning the share button to the left of the navigation item
+        pdfViewController.navigationItem.leftBarButtonItem = shareButton
+        // Keeping the done button on the right side
+        pdfViewController.navigationItem.rightBarButtonItem = doneButton
+        pdfViewController.navigationItem.title = "Scout CV"
+
+        // Present the navigation controller
+        present(navController, animated: true)
+    }
+
+    @objc func sharePDF(_ sender: UIBarButtonItem) {
+        guard let path = self.pdfURL else {
+            print("Failed to get the PDF path for sharing")
+            return
+        }
+
+        let activityVC = UIActivityViewController(activityItems: [path], applicationActivities: nil)
+        activityVC.popoverPresentationController?.barButtonItem = sender
+        activityVC.excludedActivityTypes = []  // Adjust as needed
+
+        present(activityVC, animated: true)
+    }
+    
+    private func drawText(_ text: String, in frame: CGRect, fontSize: CGFloat = 12, bold: Bool = false) {
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .font: bold ? UIFont.boldSystemFont(ofSize: fontSize) : UIFont.systemFont(ofSize: fontSize),
+                .foregroundColor: UIColor.black
+            ]
+            let attributedText = NSAttributedString(string: text, attributes: textAttributes)
+            attributedText.draw(in: frame)
+    }
+    
+    @objc func dismissPDFViewer() {
+        dismiss(animated: true)
+    }
+    @IBAction func onScoutCVClick(_ sender: Any) {
+        createScoutCV()
+    }
+    @IBAction func onPassClick(_ sender: Any) {
+      //  addWalletPassButtonTapped()
+    }
+
 }

@@ -10,6 +10,7 @@ import Firebase
 
 class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UITableViewDelegate, UITableViewDataSource {
 
+    @IBOutlet weak var groupEditBtn: UIButton!
     @IBOutlet weak var meetingSubtitleLbl: UILabel!
     @IBOutlet weak var meetingClockLbl: UILabel!
     @IBOutlet weak var groupPatrolActionBtn: BorderButton!
@@ -38,6 +39,13 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
     @IBOutlet weak var meetingPointsBtn: BorderButton!
     @IBOutlet weak var meetingGameBtn: BorderButton!
     @IBOutlet weak var meetingAttendanceBtn: BorderButton!
+    @IBOutlet weak var eventManagerView: BorderView!
+    @IBOutlet weak var eventManagerTitleLbl: UILabel!
+    @IBOutlet weak var eventManagerSubtitleLbl: UILabel!
+    @IBOutlet weak var eventManagerBtn: UIButton!
+    @IBOutlet weak var eventManagerTableView: UITableView!
+    
+    
     
     let ref = Database.database().reference()
     let storage = Storage.storage()
@@ -48,11 +56,100 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
     var leader = false
     var leadedGroup = Group()
     var myPatrol = Patrol()
+    var hostingEvent = Event()
     let user = UserDataService.instance.user
     
     override func viewDidLoad() {
         super.viewDidLoad()
         meetingPrimaryActionBtn.titleLabel?.textAlignment = .center
+        setupTableViews()
+        myPatrolTableView.isEditing = false
+        groupMemberTableView.isEditing = false
+        patrolScoreCollectionView.isEditing = false
+        setupViews()
+        attachPatrolSocket()
+        NotificationCenter.default.addObserver(self, selector: #selector(updatePatrolMembers), name: NOTIF_PATROL_MEMBER_UPDATE, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(setupEventCreationRequestView), name: NOTIF_EVENT_CREATION_REQUEST, object: nil)
+        if leader {
+            attachMeetingSocket()
+        }
+
+    }
+    //SOCKETS
+    func attachMeetingSocket() {
+        _ = ref.child("groups").child(leadedGroup.id!).child("meetings").observe(.value) { snapshot,xx  in
+            CommunityService.instance.pullMeetings { Success in
+                if CommunityService.instance.isThereAnOpenMeeting() {
+                    self.setupMeetingView()
+                }
+            }
+        }
+    }
+    func attachPatrolSocket() {
+        _ = ref.child("groups").child(leadedGroup.id!).child("patrols").observe(.value) { snapshot,xx  in
+            guard let value = snapshot.value as? NSDictionary else { return }
+            for id in value.allKeys {
+                for i in 0..<self.leadedGroup.patrols.count {
+                    if self.leadedGroup.patrols[i].name == id as? String {
+                        let subvalue = value.value(forKey: id as! String) as? NSDictionary ?? NSDictionary()
+                        if self.leadedGroup.patrols[i].score != subvalue.value(forKey: "score") as? Int ?? 0 {
+                            self.leadedGroup.patrols[i].score = subvalue.value(forKey: "score") as? Int ?? 0
+                            CommunityService.instance.patrols[i].score = subvalue.value(forKey: "score") as? Int ?? 0
+
+                            
+                        }
+                    }
+                    let cell = self.patrolScoreCollectionView.cellForItem(at: IndexPath(row: i, section: 0)) as? PatrolScoreCell
+                    cell?.setupView(patrol: self.leadedGroup.patrols[i])
+                }
+            }
+        }
+    }
+    func attachTicketsSocket() {
+        _ = ref.child("tickets").observe(.value, with: { snapshot in
+            guard let value = snapshot.value as? NSDictionary else { return }
+            CommunityService.instance.pullTickets { Success in
+                self.setupEventManagerView()
+            }
+        })
+    }
+    
+    
+    @IBAction func onGroupEditBtn(_ sender: Any) {
+        performSegue(withIdentifier: "toGroupVC", sender: self)
+    }
+    
+    @IBAction func onEventManagerClick(_ sender: Any) {
+        CommunityService.instance.attendanceMode = "event"
+        performSegue(withIdentifier: "toCollectingAttendanceVC", sender: self)
+    }
+    @objc func updatePatrolMembers() {
+//        leadedGroup = CommunityService.instance.selectedGroup
+        setupGroupPatrolOverview()
+    }
+    
+    func setupViews() {
+        welcomingLbl.text = "Welcome back \(user.name ?? "")!"
+        leadedGroup = CommunityService.instance.checkIfUserIsLeader()
+        CommunityService.instance.patrols = leadedGroup.patrols ?? [Patrol]()
+        CommunityService.instance.selectedGroup = leadedGroup
+        meetingView.isHidden = leadedGroup.id == ""
+        eventsView.isHidden = CommunityService.instance.events.count == 0
+        eventCreationRequestView.isHidden = UserDataService.instance.user.dash ?? 0 >= 0
+        leader = leadedGroup.id != ""
+        CommunityService.instance.queryGroupMembers()
+        
+        setupGroupPatrolOverview()
+        setupEventManagerView()
+        setupMyPatrolView()
+        setupMeetingView()
+        setupUpcomingEvents()
+        setupGroupMemberOverview()
+        setupWebsiteView()
+        setupEventCreationRequestView()
+    }
+    
+    func setupTableViews() {
         patrolScoreCollectionView.delegate = self
         patrolScoreCollectionView.dataSource = self
         groupMemberTableView.delegate = self
@@ -62,89 +159,42 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
         eventsTableView.delegate = self
         eventsTableView.dataSource = self
         eventsTableView.isEditing = false
-        myPatrolTableView.isEditing = false
-        groupMemberTableView.isEditing = false
-        patrolScoreCollectionView.isEditing = false
-        setupViews()
-        attachPatrolSocket()
-        NotificationCenter.default.addObserver(self, selector: #selector(updatePatrolMembers), name: NOTIF_PATROL_MEMBER_UPDATE, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(setupEventCreationRequestView), name: NOTIF_EVENT_CREATION_REQUEST, object: nil)
-
-    }
-    //SOCKETS
-    func attachMeetingSocket() {
-        _ = ref.child("groups").child(leadedGroup.id!).child("meetings").observe(.value) { snapshot,xx  in
-            CommunityService.instance.pullMeetings { Success in
-                let meeting = CommunityService.instance.isThereAnOpenMeeting()
-                self.setupMeetingView()
-            }
-        }
-    }
-    func attachPatrolSocket() {
-        _ = ref.child("groups").child(leadedGroup.id!).child("patrols").observe(.value) { snapshot,xx  in
-            guard let value = snapshot.value as? NSDictionary else { return }
-            for id in value.allKeys {
-                for i in 0..<self.leadedGroup.patrols.count {
-                    if self.leadedGroup.patrols[i].name == id as! String {
-                        let subvalue = value.value(forKey: id as! String) as? NSDictionary ?? NSDictionary()
-                        if self.leadedGroup.patrols[i].score != subvalue.value(forKey: "score") as? Int ?? 0 {
-                            self.leadedGroup.patrols[i].score = subvalue.value(forKey: "score") as? Int ?? 0
-                            let cell = self.patrolScoreCollectionView.cellForItem(at: IndexPath(row: i, section: 0)) as? PatrolScoreCell
-                            cell?.setupView(patrol: self.leadedGroup.patrols[i])
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    @objc func updatePatrolMembers() {
-//        leadedGroup = CommunityService.instance.selectedGroup
-        setupGroupPatrolOverview()
-    }
-    
-    func setupViews() {
-        welcomingLbl.text = "Welcome back \(user.name ?? "")!"
-        leadedGroup = CommunityService.instance.checkIfUserIsLeader()
-        CommunityService.instance.selectedGroup = leadedGroup
-        meetingView.isHidden = leadedGroup.id == ""
-        eventsView.isHidden = CommunityService.instance.events.count == 0
-        eventCreationRequestView.isHidden = UserDataService.instance.user.dash ?? 0 >= 0
-        leader = leadedGroup.id != ""
-        CommunityService.instance.queryGroupMembers()
-        
-        setupGroupPatrolOverview()
-        setupMyPatrolView()
-        setupMeetingView()
-        setupUpcomingEvents()
-        setupGroupMemberOverview()
-        setupWebsiteView()
-        setupEventCreationRequestView()
+        eventManagerTableView.isEditing = false
+        eventManagerTableView.delegate = self
+        eventManagerTableView.dataSource = self
     }
     
     func setupGroupPatrolOverview() {
-        groupPatrolTitleLbl.text = "\(leadedGroup.name!) Patrol Overview"
+        groupPatrolTitleLbl.text = "\(leadedGroup.name ?? "") Patrol Overview"
+        groupPatrolActionBtn.isHidden = !leader
         if leader {
             if CommunityService.instance.groupStillNeedsSorting(group: leadedGroup) {
                 patrolScoreCollectionView.isHidden = true
-                groupPatrolActionBtn.isEnabled = true
-                groupPatrolActionBtn.isHidden = false
-                groupPatrolActionBtn.setTitle("Sort Patrols", for: .normal)
             } else {
                 patrolScoreCollectionView.isHidden = false
-                groupPatrolActionBtn.isHidden = true
             }
         } else {
 //            CommunityService.instance.selectedGroup = leadedGroup
             let patrols = CommunityService.instance.selectedGroup.patrols
             if patrols?.count == 0 {
-                groupPatrolActionBtn.isHidden = false
-                groupPatrolActionBtn.isEnabled = false
-                groupPatrolActionBtn.setTitle("Patrols not sorted yet", for: .normal)
+
             } else {
-                groupPatrolActionBtn.isHidden = true
                 patrolScoreCollectionView.isHidden = false
             }
+        }
+    }
+    
+    func setupEventManagerView() {
+        hostingEvent = CommunityService.instance.queryHostingEvent()
+        if hostingEvent.id != "" {
+            eventManagerTitleLbl.text = hostingEvent.title
+            let tickets = CommunityService.instance.queryEventTickets(event: hostingEvent)
+            eventManagerSubtitleLbl.text = "(\(tickets.count)/\(hostingEvent.maxLimit))  \(hostingEvent.date)"
+            eventManagerTableView.reloadData()
+            var today = CommunityService.instance.isDateToday(dateString: hostingEvent.date)
+            eventManagerBtn.isHidden = !today
+        } else {
+            eventManagerView.isHidden = true
         }
     }
     
@@ -163,21 +213,34 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
         meetingSubtitleLbl.text = ""
         meetingClockLbl.text = ""
         if leader {
-            attachMeetingSocket()
             meetingPointsBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
             meetingAttendanceBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
             meetingGameBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
             if CommunityService.instance.isThereAnOpenMeeting() {
+                meetingClockLbl.isHidden = false
                 meetingPrimaryActionBtn.setTitle("END MEETING", for: .normal)
                 let user = CommunityService.instance.queryUser(UserID: CommunityService.instance.openMeeting.hostID)
-                meetingSubtitleLbl.text = "Hosted by \(user.id)"
+                meetingSubtitleLbl.text = "Hosted by \(user.name!)"
                 if user.id == UserDataService.instance.user.id {
                     meetingSubtitleLbl.text = "Hosted by you"
+                }
+                if CommunityService.instance.openMeeting.collectingAttendance == UserDataService.instance.user.id {
+//                   self.performSegue(withIdentifier: "toCollectingAttendanceVC", sender: self)
+               } else if CommunityService.instance.openMeeting.collectingAttendance != "" {
+                     meetingAttendanceBtn.isEnabled = false
+                     let collector = CommunityService.instance.queryUser(UserID: CommunityService.instance.openMeeting.collectingAttendance!)
+                     meetingAttendanceBtn.setTitle("\(collector.name!) is collecting attendance", for: .normal)
+                     meetingAttendanceBtn.backgroundColor = .darkGray
+                 } else {
+                    meetingAttendanceBtn.isEnabled = true
+                    meetingAttendanceBtn.setTitle("Collect Attendance", for: .normal)
+                    meetingAttendanceBtn.backgroundColor = .blue
                 }
                 timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateElapsedTime), userInfo: nil, repeats: true)
             } else {
                 meetingPrimaryActionBtn.setTitle("START MEETING", for: .normal)
                 self.timer?.invalidate()
+                meetingClockLbl.isHidden = true
             }
         }
         // check if meeting is scheduled almost now
@@ -241,7 +304,10 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
         }
     }
     @IBAction func onCollectAttendanceClick(_ sender: Any) {
-        performSegue(withIdentifier: "toCollectingAttendanceVC", sender: self)
+        CommunityService.instance.attendanceMode = "meeting"
+        CommunityService.instance.startCollectingAttendances { Success in
+            self.performSegue(withIdentifier: "toCollectingAttendanceVC", sender: self)
+        }
     }
     @IBAction func onStartGameClick(_ sender: Any) {
         
@@ -294,6 +360,8 @@ extension HomeVC {
             return CommunityService.instance.selectedGroupMembers.count
         } else if tableView == eventsTableView {
             return CommunityService.instance.events.count
+        } else if tableView == eventManagerTableView {
+            return CommunityService.instance.queryEventTickets(event: hostingEvent).count
         } else {
             //my patrol tableView
             if myPatrol.name != nil {
@@ -303,18 +371,17 @@ extension HomeVC {
             }
         }
     }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView == eventsTableView {
             CommunityService.instance.selectedEvent = CommunityService.instance.events[indexPath.row]
             performSegue(withIdentifier: "homeToEventVC", sender: self)
         }
     }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableView == eventsTableView {
             if let cell = tableView.dequeueReusableCell(withIdentifier: "UpcomingEventCell") as? UpcomingEventCell {
-                NSLayoutConstraint.activate([
-                    cell.heightAnchor.constraint(equalToConstant: 70)
-                ])
                 cell.setupCell(event: CommunityService.instance.events[indexPath.row])
                 return cell
             }
@@ -323,9 +390,9 @@ extension HomeVC {
             if let cell = tableView.dequeueReusableCell(withIdentifier: "GroupMemberCell") as? GroupMemberCell {
                 if tableView == groupMemberTableView {
                     let user = CommunityService.instance.selectedGroupMembers[indexPath.row]
-                    let patrol = CommunityService.instance.queryPatrol(user: user)
-                    cell.setupView(user: user, top: patrol.name, bottom: "#\(indexPath.row + 1)", subtitle: "")
-                } else {
+                    let patrol = CommunityService.instance.queryPatrol(user: user) ?? Patrol()
+                    cell.setupView(user: user, top: patrol.name ?? "", bottom: "#\(indexPath.row + 1)", subtitle: "\(user.score ?? 0) pts")
+                } else if tableView == myPatrolTableView {
                     //my patrol
                     var role = "member"
                     let user = myPatrol.members[indexPath.row]
@@ -338,8 +405,27 @@ extension HomeVC {
                     } else {
                         role = "member"
                     }
-                    cell.setupView(user: myPatrol.members[indexPath.row], top: role, bottom: "#\(indexPath.row + 1)", subtitle: "")
+                    var absences = "absences"
+                    let absenceCount = CommunityService.instance.countAbsences(user: user)
+                    if absenceCount == 1 {
+                        absences = "absence"
+                    }
+                    cell.setupView(user: myPatrol.members[indexPath.row],
+                                   top: role,
+                                   bottom: "#\(indexPath.row + 1)",
+                                   subtitle: "\(absenceCount) \(absences)")
 
+                } else {
+                    //hosting event
+                    let tickets = CommunityService.instance.queryEventTickets(event: hostingEvent)
+                    let ticket = tickets[indexPath.row]
+                    let user = CommunityService.instance.queryUser(UserID: ticket.userID)
+                    let group = CommunityService.instance.queryGroup(user: user)
+                    var bottom = ticket.scanned.isEmpty ? "" : "SCANNED"
+                    cell.setupView(user: user,
+                                   top: group.name,
+                                   bottom: bottom,
+                                   subtitle: "")
                 }
                 return cell
             }
