@@ -26,12 +26,24 @@ class CommunityService {
     var selectedTicket = Ticket()
     var selectedGroup = Group()
     var selectedGroupMembers = [User]()
+    var selectedMember = User()
     var groups = [Group]()
     var chosenMode = ""
     var STMode = ""
+    var attendanceMode = ""
     var requestedAnEvent = false
     var openMeeting = Meeting()
     var meetings = [Meeting]()
+    
+    func didMemberClockInBefore(user: User) -> Bool {
+        var flag = false
+        for attendance in openMeeting.attendances {
+            if attendance.key == user.id {
+                flag = true
+            }
+        }
+        return flag
+    }
     
     func pullEventRequestStatus(completion: @escaping CompletionHandler) {
         ref.child("eventRequests").getData { error, snapshot in
@@ -48,10 +60,44 @@ class CommunityService {
         }
     }
     
+    func isDateToday(dateString: String) -> Bool {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+        dateFormatter.timeZone = TimeZone.current
+        
+        if let date = dateFormatter.date(from: dateString) {
+            return Calendar.current.isDateInToday(date)
+        }
+        
+        return false
+    }
+    
+    func countAbsences(user: User) -> Int {
+        let group = queryGroup(user: user)
+        let meetings = group.meetings ?? [Meeting]()
+        var attendances = 0
+        for meeting in meetings {
+            if meeting.attendances.filter { $0.key == user.id}.count > 0 {
+                attendances += 1
+            }
+        }
+        return meetings.count - attendances
+    }
+    
+    func queryHostingEvent() -> Event {
+        var foundEvent = Event()
+        for event in events {
+            let group = CommunityService.instance.checkIfUserIsLeader()
+            if event.hostID == UserDataService.instance.user.id || event.groupID == group.id {
+                foundEvent = event
+            }
+        }
+        return foundEvent
+    }
     
     func queryGroup(user: User) -> Group {
         for group in groups {
-            if (group.gender == user.gender || group.gender == "Both") && group.dashes.contains(user.dash) {
+            if (group.gender == user.gender || group.gender == "Both") && group.dashes.contains(user.dash ?? 10000) {
                 return group
             }
         }
@@ -75,11 +121,14 @@ class CommunityService {
     
     func groupStillNeedsSorting(group: Group) -> Bool {
         var members = [User]()
-        for patrol in group.patrols {
-            for aMember in patrol.members {
-                members.append(aMember)
+        if let patrols = group.patrols {
+            for patrol in group.patrols {
+                for aMember in patrol.members {
+                    members.append(aMember)
+                }
             }
         }
+
         return members.count < selectedGroupMembers.count
     }
     
@@ -262,6 +311,10 @@ class CommunityService {
         return flag
     }
     
+    func queryEventTickets(event: Event) -> [Ticket] {
+        return tickets.filter { $0.event.id == event.id}
+    }
+    
     func purchaseTicket(trxID: String, completion: @escaping CompletionHandler) {
         let formatter : DateFormatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
@@ -285,6 +338,7 @@ class CommunityService {
             for id in value.allKeys {
                 let subvalue = value.value(forKey: id as! String) as? NSDictionary
                 let eventID = subvalue?.value(forKey: "event") as! String
+                let scanned = subvalue?.value(forKey: "scanned") as? String ?? ""
                 let userID = subvalue?.value(forKey: "user") as! String
                 let timestamp = subvalue?.value(forKey: "timestamp") as! String
                 let trxID = subvalue?.value(forKey: "trxID") as! String
@@ -296,7 +350,9 @@ class CommunityService {
                     event = foundEvent
                 }
 
-                let ticket = Ticket(event: event,
+                let ticket = Ticket(id: id as! String,
+                                    scanned: scanned,
+                                    event: event,
                                     userID: userID,
                                     timestamp: timestamp,
                                     trxID: trxID,
@@ -331,8 +387,14 @@ class CommunityService {
             for id in value.allKeys {
                 let subvalue = value.value(forKey: id as! String) as? NSDictionary ?? NSDictionary()
                 let name = subvalue.value(forKey: "name") as? String ?? ""
-                let phone = subvalue.value(forKey: "mobile") as? String ?? ""
+                var phone = subvalue.value(forKey: "mobile") as? String ?? ""
+
+                // Check if the phone number doesn't start with "0"
+                if !phone.hasPrefix("0") && !phone.isEmpty {
+                    phone = "0" + phone
+                }
                 let email = subvalue.value(forKey: "email") as? String ?? ""
+                let score = subvalue.value(forKey: "score") as? Int ?? 0
                 let createdAt = subvalue.value(forKey: "createdAt") as? String ?? ""
                 let gender = subvalue.value(forKey: "gender") as? String ?? ""
                 let dateOfBirth = subvalue.value(forKey: "dateOfBirth") as? String ?? ""
@@ -350,6 +412,7 @@ class CommunityService {
                 }
                 
                 let user = User(id: id as! String,
+                                score: score,
                                  name: name,
                                  dateOfBirth: dateOfBirth,
                                  phone: phone,
@@ -378,6 +441,7 @@ class CommunityService {
                 let desc = subvalue?.value(forKey: "desc") as! String
                 let badgeID = subvalue?.value(forKey: "badgeID") as! String
                 let groupID = subvalue?.value(forKey: "groupID") as! String
+                let hostID = subvalue?.value(forKey: "hostID") as? String ?? ""
                 let price = subvalue?.value(forKey: "price") as! Int
                 let maxLimit = subvalue?.value(forKey: "maxLimit") as! Int
 
@@ -390,6 +454,7 @@ class CommunityService {
                                   desc: desc,
                                   badgeID: badgeID,
                                   groupID: groupID,
+                                  hostID: hostID,
                                   price: price,
                                   maxLimit: maxLimit,
 
@@ -497,7 +562,7 @@ class CommunityService {
                     let gamePoints = subvalue?.value(forKey: "gamePoints") as? Int ?? 0
                     let collectingAttendanceID = subvalue?.value(forKey: "collectingAttendance") as? String ?? ""
                     var attendancesArray: [String : String] = [:]
-                    if let attendances = subvalue?.value(forKey: "attendances") as? NSDictionary {
+                    if let attendances = subvalue?.value(forKey: "attendance") as? NSDictionary {
                         for attendance in attendances {
                             attendancesArray.updateValue(attendance.value as! String, forKey: attendance.key as! String)
                         }
@@ -532,7 +597,7 @@ class CommunityService {
          
         ref.child("groups").child(selectedGroup.id).child("meetingID").updateChildValues([
             "gameOpenTime": dateStr,
-            "gameHost": UserDataService.instance.user.id,
+            "gameHost": UserDataService.instance.user.id!,
             "gameTitle": title,
             "gamePoints": points
         ])
@@ -558,16 +623,25 @@ class CommunityService {
     }
     
     func startCollectingAttendances(completion: @escaping CompletionHandler) {
-        ref.child("groups").child(selectedGroup.id).child("meetingID").updateChildValues([
+        ref.child("groups").child(selectedGroup.id).child("meetings").child(openMeeting.id).updateChildValues([
             "collectingAttendance": UserDataService.instance.user.id!
         ])
         completion(true)
     }
     
+    func stopCollectingAttendance() {
+        if isThereAnOpenMeeting() {
+            if openMeeting.collectingAttendance == UserDataService.instance.user.id {
+                ref.child("groups").child(selectedGroup.id).child("meetings").child(openMeeting.id).updateChildValues(["collectingAttendance": ""])
+            }
+        }
+    }
+    
     func clockInMember(id: String, completion: @escaping CompletionHandler) {
         var valid = false
         for user in users {
-            if user.id == id {
+            let group = queryGroup(user: user)
+            if user.id == id && group.id == selectedGroup.id {
                 valid = true
             }
         }
@@ -576,11 +650,22 @@ class CommunityService {
         let dateStr : String = formatter.string(from: NSDate.init(timeIntervalSinceNow: 0) as Date)
            
         if valid {
-            ref.child("groups").child(selectedGroup.id).child("meetingID").child("attendance").updateChildValues([id : dateStr])
+            ref.child("groups").child(selectedGroup.id).child("meetings").child(openMeeting.id).child("attendance").updateChildValues([id : dateStr])
+            openMeeting.attendances.updateValue(dateStr, forKey: id)
             completion(true)
         } else {
             completion(false)
         }
+    }
+    
+    func scanTicket(ticket: Ticket) {
+        let formatter : DateFormatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+        let dateStr : String = formatter.string(from: NSDate.init(timeIntervalSinceNow: 0) as Date)
+           
+        ref.child("tickets").child(ticket.id).updateChildValues([
+            "scanned": dateStr
+        ])
     }
     
     func isThereAnOpenMeeting() -> Bool {
@@ -596,6 +681,18 @@ class CommunityService {
     
     func queryUser(UserID: String) -> User {
         return users.filter { $0.id == UserID }[0]
+    }
+    
+    func countPatrolLiveAttendances(patrolName: String) -> Int {
+        var count = 0
+        for attendance in openMeeting.attendances {
+            let user = queryUser(UserID: attendance.key)
+            let patrol = queryPatrol(user: user)
+            if patrol.name == patrolName {
+                count += 1
+            }
+        }
+        return count
     }
     
 }

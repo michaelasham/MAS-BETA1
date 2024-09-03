@@ -35,24 +35,24 @@ class CategoryCell: UITableViewCell {
         ImageView.isHidden = false
         switch title {
         case "نيران":
-            ImageView.image = UIImage(named: "flame")
+            ImageView.image = UIImage(systemName: "flame")
         case "ربطات":
-            ImageView.image = UIImage(named: "point.bottomleft.forward.to.point.topright.scurvepath")
+            ImageView.image = UIImage(systemName: "point.bottomleft.forward.to.point.topright.scurvepath")
 
         case "خيام":
-            ImageView.image = UIImage(named: "tent.2")
+            ImageView.image = UIImage(systemName: "tent.2")
 
         case "صلوات":
-            ImageView.image = UIImage(named: "cross")
+            ImageView.image = UIImage(systemName: "cross")
 
         case "شفرات":
-            ImageView.image = UIImage(named: "key.viewfinder")
+            ImageView.image = UIImage(systemName: "key.viewfinder")
 
         case "بروتوكول":
-            ImageView.image = UIImage(named: "books.vertical")
+            ImageView.image = UIImage(systemName: "books.vertical")
 
         case "صيحات":
-            ImageView.image = UIImage(named: "music.note.list")
+            ImageView.image = UIImage(systemName: "music.note.list")
 
         default:
             ImageView.isHidden = true

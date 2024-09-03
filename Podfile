@@ -10,6 +10,7 @@ target 'MAS-BETA1' do
   pod 'Firebase/Database'
   pod 'Firebase/Storage'
   pod 'Firebase/Auth'
+  pod 'Firebase/Messaging'
   pod 'Alamofire'
   pod 'AcceptCardSDK'
   pod 'Toast-Swift'

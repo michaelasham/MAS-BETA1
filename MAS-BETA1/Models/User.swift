@@ -9,6 +9,7 @@ import Foundation
 
 struct User {
     public private(set) var id: String!
+    public private(set) var score: Int!
     public private(set) var name: String!
     public private(set) var dateOfBirth: String!
     public private(set) var phone: String!
@@ -19,6 +20,17 @@ struct User {
 
     public private(set) var createdAt: String!
     public private(set) var lastUpdated: String!
+}
+
+struct NewUser {
+    public private(set) var name: String!
+    public private(set) var dateOfBirth: String!
+    public private(set) var phone: String!
+    public private(set) var gender: String!
+    public private(set) var group: String!
+    public private(set) var referrer: String!
+    public private(set) var timestamp: String!
+
 }
 
 struct Comment {

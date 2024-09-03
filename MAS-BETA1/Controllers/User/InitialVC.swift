@@ -39,6 +39,7 @@ class InitialVC: UIViewController {
                                         self.postProgess(progress: 91)
                                         CommunityService.instance.pullMeetings { Success in
                                             self.postProgess(progress: 95)
+                                            CommunityService.instance.stopCollectingAttendance()
                                             self.proceed()
                                         }
                                     }
