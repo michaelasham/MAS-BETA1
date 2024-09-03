@@ -72,6 +72,14 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
 
     }
     //SOCKETS
+    func attachMeetingSocket() {
+        _ = ref.child("groups").child(leadedGroup.id!).child("meetings").observe(.value) { snapshot,xx  in
+            CommunityService.instance.pullMeetings { Success in
+                let meeting = CommunityService.instance.isThereAnOpenMeeting()
+                self.setupMeetingView()
+            }
+        }
+    }
     func attachPatrolSocket() {
         _ = ref.child("groups").child(leadedGroup.id!).child("patrols").observe(.value) { snapshot,xx  in
             guard let value = snapshot.value as? NSDictionary else { return }
@@ -155,6 +163,7 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
         meetingSubtitleLbl.text = ""
         meetingClockLbl.text = ""
         if leader {
+            attachMeetingSocket()
             meetingPointsBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
             meetingAttendanceBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
             meetingGameBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
