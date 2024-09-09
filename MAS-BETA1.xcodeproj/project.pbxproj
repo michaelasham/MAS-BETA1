@@ -53,6 +53,9 @@
 		4C5F03642C875EE300BD4242 /* GroupVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F03632C875EE300BD4242 /* GroupVC.swift */; };
 		4C5F03662C875EED00BD4242 /* MemberVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F03652C875EED00BD4242 /* MemberVC.swift */; };
 		4C5F03682C8773ED00BD4242 /* PushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F03672C8773ED00BD4242 /* PushNotificationService.swift */; };
+		4CF385472C8E06CD007D896C /* GameVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF385462C8E06CD007D896C /* GameVC.swift */; };
+		4CF385492C8E0DF1007D896C /* GameScoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF385482C8E0DF1007D896C /* GameScoreCell.swift */; };
+		4CF3854B2C8E525A007D896C /* DisburseVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF3854A2C8E525A007D896C /* DisburseVC.swift */; };
 		4CFEC67B2C23B56900D34246 /* PatrolScoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFEC67A2C23B56900D34246 /* PatrolScoreCell.swift */; };
 		4CFEC67D2C23B5C200D34246 /* GroupMemberCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFEC67C2C23B5C200D34246 /* GroupMemberCell.swift */; };
 		4CFEC67F2C23B64400D34246 /* EventCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFEC67E2C23B64400D34246 /* EventCell.swift */; };
@@ -109,6 +112,9 @@
 		4C5F03632C875EE300BD4242 /* GroupVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupVC.swift; sourceTree = "<group>"; };
 		4C5F03652C875EED00BD4242 /* MemberVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberVC.swift; sourceTree = "<group>"; };
 		4C5F03672C8773ED00BD4242 /* PushNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationService.swift; sourceTree = "<group>"; };
+		4CF385462C8E06CD007D896C /* GameVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameVC.swift; sourceTree = "<group>"; };
+		4CF385482C8E0DF1007D896C /* GameScoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScoreCell.swift; sourceTree = "<group>"; };
+		4CF3854A2C8E525A007D896C /* DisburseVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisburseVC.swift; sourceTree = "<group>"; };
 		4CFEC67A2C23B56900D34246 /* PatrolScoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatrolScoreCell.swift; sourceTree = "<group>"; };
 		4CFEC67C2C23B5C200D34246 /* GroupMemberCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMemberCell.swift; sourceTree = "<group>"; };
 		4CFEC67E2C23B64400D34246 /* EventCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCell.swift; sourceTree = "<group>"; };
@@ -146,6 +152,8 @@
 				4C2A78C42C277DF50098FFBB /* CollectingAttendanceVC.swift */,
 				4C5F03632C875EE300BD4242 /* GroupVC.swift */,
 				4C5F03652C875EED00BD4242 /* MemberVC.swift */,
+				4CF385462C8E06CD007D896C /* GameVC.swift */,
+				4CF3854A2C8E525A007D896C /* DisburseVC.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -272,6 +280,7 @@
 				4CFEC67E2C23B64400D34246 /* EventCell.swift */,
 				4C4F27262C245C8C00EB3690 /* PatrolMemberCell.swift */,
 				4C2A78C02C274C930098FFBB /* UpcomingEventCell.swift */,
+				4CF385482C8E0DF1007D896C /* GameScoreCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -408,6 +417,7 @@
 				4C4EF21E2C233BAA0032031E /* FullScreenVC.swift in Sources */,
 				4C5F03682C8773ED00BD4242 /* PushNotificationService.swift in Sources */,
 				4C52CD012C21C65D00646D7F /* EventVC.swift in Sources */,
+				4CF385472C8E06CD007D896C /* GameVC.swift in Sources */,
 				4CFEC67F2C23B64400D34246 /* EventCell.swift in Sources */,
 				4C52CCFC2C21C65D00646D7F /* Badge.swift in Sources */,
 				4C5F03642C875EE300BD4242 /* GroupVC.swift in Sources */,
@@ -420,6 +430,7 @@
 				4C52CCFF2C21C65D00646D7F /* User.swift in Sources */,
 				4C52CD092C21C65D00646D7F /* ProfileVC.swift in Sources */,
 				4C52CD0D2C21C65D00646D7F /* BadgeCell.swift in Sources */,
+				4CF3854B2C8E525A007D896C /* DisburseVC.swift in Sources */,
 				4C52CD1B2C21D51200646D7F /* MaterialCell.swift in Sources */,
 				4C52CD0E2C21C65D00646D7F /* BorderButton.swift in Sources */,
 				4C52CD112C21C65D00646D7F /* TicketCell.swift in Sources */,
@@ -428,6 +439,7 @@
 				4CFEC67D2C23B5C200D34246 /* GroupMemberCell.swift in Sources */,
 				4C52CCF82C21C65D00646D7F /* CommunityService.swift in Sources */,
 				4C4F27252C24367100EB3690 /* PatrolSortingVC.swift in Sources */,
+				4CF385492C8E0DF1007D896C /* GameScoreCell.swift in Sources */,
 				4C4F27272C245C8C00EB3690 /* PatrolMemberCell.swift in Sources */,
 				4C52CCF62C21C65D00646D7F /* AuthService.swift in Sources */,
 				4C52CCFB2C21C65D00646D7F /* UserDataService.swift in Sources */,

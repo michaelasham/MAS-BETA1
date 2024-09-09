@@ -35,6 +35,8 @@ class CommunityService {
     var openMeeting = Meeting()
     var meetings = [Meeting]()
     
+    var sliderScores = 0
+    
     func didMemberClockInBefore(user: User) -> Bool {
         var flag = false
         for attendance in openMeeting.attendances {
@@ -44,6 +46,7 @@ class CommunityService {
         }
         return flag
     }
+    
     
     func pullEventRequestStatus(completion: @escaping CompletionHandler) {
         ref.child("eventRequests").getData { error, snapshot in
@@ -154,18 +157,7 @@ class CommunityService {
                         }
                     }
                 }
-                //patrols
-//                struct Patrol {
-//                    public private(set) var name: String!
-//                    public var chief: User!
-//                    public var vice: User!
-//                    public var troisieme: User!
-//                    public var members: [User]!
-//                    public var score: Int!
-//
-//                    public private(set) var createdAt: String!
-//                    public private(set) var lastUpdated: String!
-//                }
+
                 var patrols = [Patrol]()
                 if let patrolsDict = subvalue!.value(forKey: "patrols") as? NSDictionary {
                     for patrol in patrolsDict.allKeys {
@@ -174,7 +166,7 @@ class CommunityService {
                         let chiefID = subvalue.value(forKey: "chief") as? String ?? ""
                         let viceID = subvalue.value(forKey: "vice") as? String ?? ""
                         let troisiemeID = subvalue.value(forKey: "troisieme") as? String ?? ""
-                        let score = subvalue.value(forKey: "score") as? Int ?? 0
+//                        let score = subvalue.value(forKey: "score") as? Int ?? 0
                         
                         var chief = User()
                         var vice = User()
@@ -201,11 +193,29 @@ class CommunityService {
                                                vice: vice,
                                                troisieme: troisieme,
                                                members: members,
-                                               score: score,
+                                               score: 0,
                                                createdAt: "",
                                                lastUpdated: "")
                         patrols.append(newPatrol)
                         
+                    }
+                }
+                // patrol point book
+                var lines = [LedgerLine]()
+                if let linesDict = subvalue!.value(forKey: "patrolPointBook") as? NSDictionary {
+                    for line in linesDict.allKeys {
+                        let id = line as! String
+                        let subvalue = linesDict.value(forKey: line as! String) as? NSDictionary ?? NSDictionary()
+                        let amount = subvalue.value(forKey: "amount") as? Int ?? 0
+                        let reason = subvalue.value(forKey: "reason") as? String ?? ""
+                        let timestamp = subvalue.value(forKey: "timestamp") as? String ?? ""
+                        let patrol = subvalue.value(forKey: "patrol") as? String ?? ""
+                        let formattedLine = LedgerLine(id: id,
+                                                       patrol: patrol,
+                                                       amount: amount,
+                                                       reason: reason,
+                                                       timestamp: timestamp)
+                        lines.append(formattedLine)
                     }
                 }
                 //group assembly
@@ -214,13 +224,27 @@ class CommunityService {
                                   gender: subvalue?.value(forKey: "gender") as? String,
                                   dashes: subvalue?.value(forKey: "dashes") as? [Int] ?? [Int](),
                                   leaders: leaders,
+                                  ledgerLines: lines,
                                   patrols: patrols,
                                   createdAt: subvalue?.value(forKey: "createdAt") as? String ?? String(),
                                   lastUpdated: subvalue?.value(forKey: "lastUpdated") as? String ?? String()
                 )
                 self.groups.append(group)
             }
+            self.calculatePatrolScores()
             completion(true)
+        }
+    }
+    
+    func calculatePatrolScores() {
+        for i in 0..<patrols.count {
+            var score = 0
+            for line in selectedGroup.ledgerLines! {
+                if line.patrol == patrols[i].name {
+                    score += line.amount
+                }
+            }
+            patrols[i].score = max(0,score)
         }
     }
     
@@ -533,6 +557,7 @@ class CommunityService {
                 meetings[i].closeTime = openMeeting.closeTime
             }
         }
+        openMeeting = Meeting()
         completion(true)
     }
     
@@ -558,7 +583,7 @@ class CommunityService {
                     let gameOpenTime = subvalue?.value(forKey: "gameOpenTime") as? String ?? ""
                     let gameCloseTime = subvalue?.value(forKey: "gameCloseTime") as? String ?? ""
                     let gameTitle = subvalue?.value(forKey: "gameTitle") as? String ?? ""
-                    let gameWinner = subvalue?.value(forKey: "gameWinner") as? String ?? ""
+                    let gameWinner = subvalue?.value(forKey: "gameWinnerID") as? String ?? ""
                     let gamePoints = subvalue?.value(forKey: "gamePoints") as? Int ?? 0
                     let collectingAttendanceID = subvalue?.value(forKey: "collectingAttendance") as? String ?? ""
                     var attendancesArray: [String : String] = [:]
@@ -595,12 +620,13 @@ class CommunityService {
         formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
         let dateStr : String = formatter.string(from: NSDate.init(timeIntervalSinceNow: 0) as Date)
          
-        ref.child("groups").child(selectedGroup.id).child("meetingID").updateChildValues([
+        ref.child("groups").child(selectedGroup.id).child("meetings").child(openMeeting.id).updateChildValues([
             "gameOpenTime": dateStr,
             "gameHost": UserDataService.instance.user.id!,
             "gameTitle": title,
             "gamePoints": points
         ])
+        NotificationCenter.default.post(name: NOTIF_GAME_UPDATE, object: nil)
         completion(true)
     }
     
@@ -608,17 +634,44 @@ class CommunityService {
         let formatter : DateFormatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
         let dateStr : String = formatter.string(from: NSDate.init(timeIntervalSinceNow: 0) as Date)
-        ref.child("groups").child(selectedGroup.id).child("meetingID").child("game").updateChildValues([
-            "groupCloseTime": dateStr,
-            "groupWinnerID": winnerID
+        ref.child("groups").child(selectedGroup.id).child("meetings").child(openMeeting.id).updateChildValues([
+            "gameCloseTime": dateStr,
+            "gameWinnerID": winnerID
         ])
         for line in pointDistribution {
-            ref.child("groups").child(selectedGroup.id).child("patrolPointBook").childByAutoId().updateChildValues([
-                "patrol" : line.key,
-                "amount" : line.value,
-                "timestamp" : dateStr,
-                "reason" : "Game \(openMeeting.gameTitle ?? "")"
-            ])
+            if line.value as! Int > 0 {
+                ref.child("groups").child(selectedGroup.id).child("patrolPointBook").childByAutoId().updateChildValues([
+                    "patrol" : line.key,
+                    "amount" : line.value,
+                    "timestamp" : dateStr,
+                    "reason" : "Game \(openMeeting.gameTitle ?? "")"
+                ])
+            }
+            for apatrol in patrols {
+                if apatrol.name == line.key {
+                    ref.child("groups").child(selectedGroup.id).child("patrols").child(line.key).updateChildValues(["score": line.value + apatrol.score])
+                }
+            }
+        }
+        openMeeting.gameCloseTime = dateStr
+        openMeeting.gameWinner = winnerID
+        NotificationCenter.default.post(name: NOTIF_GAME_UPDATE, object: nil)
+    }
+    func disburseManually(amount: Int, reason: String, patrol: Patrol) {
+        let formatter : DateFormatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy HH:mm:ss"
+        let dateStr : String = formatter.string(from: NSDate.init(timeIntervalSinceNow: 0) as Date)
+        
+        ref.child("groups").child(selectedGroup.id).child("patrolPointBook").childByAutoId().updateChildValues([
+            "patrol" : patrol.name!,
+            "amount" : amount,
+            "timestamp" : dateStr,
+            "reason" : "\(UserDataService.instance.user.name!): \(reason)"
+        ])
+        for apatrol in patrols {
+            if apatrol.name == patrol.name {
+                ref.child("groups").child(selectedGroup.id).child("patrols").child(apatrol.name).updateChildValues(["score": amount + apatrol.score])
+            }
         }
     }
     
@@ -697,7 +750,15 @@ class CommunityService {
     }
     
     func queryUser(UserID: String) -> User {
-        return users.filter { $0.id == UserID }[0]
+        let filteredUsers = users.filter { $0.id == UserID }
+        
+        // Check if the filtered result is not empty
+        if let user = filteredUsers.first {
+            return user
+        } else {
+            // Return nil or handle the case when the user is not found
+            return User()
+        }
     }
     
     func countPatrolLiveAttendances(patrolName: String) -> Int {
@@ -712,4 +773,6 @@ class CommunityService {
         return count
     }
     
+    
+
 }

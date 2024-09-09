@@ -47,9 +47,19 @@ struct Group {
     public private(set) var dashes: [Int]!
     public private(set) var leaders: [User]!
     public private(set) var meetings: [Meeting]?
+    public private(set) var ledgerLines: [LedgerLine]?
     public var patrols: [Patrol]!
     public private(set) var createdAt: String!
     public private(set) var lastUpdated: String!
+    
+}
+
+struct LedgerLine {
+    public private(set) var id: String!
+    public private(set) var patrol: String!
+    public private(set) var amount: Int!
+    public private(set) var reason: String!
+    public private(set) var timestamp: String!
 }
 
 struct Patrol {
