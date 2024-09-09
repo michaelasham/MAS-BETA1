@@ -30,6 +30,8 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
     @IBOutlet weak var eventsTableView: UITableView!
     @IBOutlet weak var meetingTitleLbl: UILabel!
     @IBOutlet weak var meetingPrimaryActionBtn: CircleButton!
+    @IBOutlet weak var meetingGameLbl: UILabel!
+    @IBOutlet weak var meetingGameTimerLbl: UILabel!
     @IBOutlet weak var websiteBannerLbl: UILabel!
     @IBOutlet weak var websiteImageView: UIImageView!
     @IBOutlet weak var myPatrolActionBtn: BorderButton!
@@ -47,11 +49,13 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
     
     
     
+    
     let ref = Database.database().reference()
     let storage = Storage.storage()
     let storageRef = Storage.storage().reference()
     
     var timer: Timer?
+    var gameTimer: Timer?
     
     var leader = false
     var leadedGroup = Group()
@@ -61,7 +65,6 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        meetingPrimaryActionBtn.titleLabel?.textAlignment = .center
         setupTableViews()
         myPatrolTableView.isEditing = false
         groupMemberTableView.isEditing = false
@@ -70,6 +73,7 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
         attachPatrolSocket()
         NotificationCenter.default.addObserver(self, selector: #selector(updatePatrolMembers), name: NOTIF_PATROL_MEMBER_UPDATE, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(setupEventCreationRequestView), name: NOTIF_EVENT_CREATION_REQUEST, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(setupMeetingView), name: NOTIF_GAME_UPDATE, object: nil)
         if leader {
             attachMeetingSocket()
         }
@@ -126,6 +130,10 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
     @objc func updatePatrolMembers() {
 //        leadedGroup = CommunityService.instance.selectedGroup
         setupGroupPatrolOverview()
+    }
+    
+    @objc func setupEventCreationRequestView() {
+        eventCreationRequestView.isHidden = !leader || CommunityService.instance.requestedAnEvent
     }
     
     func setupViews() {
@@ -191,7 +199,7 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
             let tickets = CommunityService.instance.queryEventTickets(event: hostingEvent)
             eventManagerSubtitleLbl.text = "(\(tickets.count)/\(hostingEvent.maxLimit))  \(hostingEvent.date)"
             eventManagerTableView.reloadData()
-            var today = CommunityService.instance.isDateToday(dateString: hostingEvent.date)
+            let today = CommunityService.instance.isDateToday(dateString: hostingEvent.date)
             eventManagerBtn.isHidden = !today
         } else {
             eventManagerView.isHidden = true
@@ -200,7 +208,7 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
     
     func setupGroupMemberOverview() {
         groupMemberOverviewView.isHidden = CommunityService.instance.selectedGroupMembers.count == 0
-        groupMemberTitleLbl.text = "\(CommunityService.instance.selectedGroup.name!) Member Overview"
+        groupMemberTitleLbl.text = "\(CommunityService.instance.selectedGroup.name ?? "") Member Overview"
     }
     
     func setupUpcomingEvents() {
@@ -208,10 +216,12 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
         eventsView.isHidden = CommunityService.instance.events.count == 0
     }
     
-    func setupMeetingView() {
+    @objc func setupMeetingView() {
         meetingView.isHidden = !leader
         meetingSubtitleLbl.text = ""
         meetingClockLbl.text = ""
+        meetingGameLbl.text = ""
+        meetingGameTimerLbl.text = ""
         if leader {
             meetingPointsBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
             meetingAttendanceBtn.isHidden = !CommunityService.instance.isThereAnOpenMeeting()
@@ -228,18 +238,42 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
 //                   self.performSegue(withIdentifier: "toCollectingAttendanceVC", sender: self)
                } else if CommunityService.instance.openMeeting.collectingAttendance != "" {
                      meetingAttendanceBtn.isEnabled = false
-                     let collector = CommunityService.instance.queryUser(UserID: CommunityService.instance.openMeeting.collectingAttendance!)
-                     meetingAttendanceBtn.setTitle("\(collector.name!) is collecting attendance", for: .normal)
+                     let collector = CommunityService.instance.queryUser(UserID: CommunityService.instance.openMeeting.collectingAttendance ?? "")
+                     meetingAttendanceBtn.setTitle("\(collector.name ?? "") is collecting attendance", for: .normal)
                      meetingAttendanceBtn.backgroundColor = .darkGray
                  } else {
                     meetingAttendanceBtn.isEnabled = true
                     meetingAttendanceBtn.setTitle("Collect Attendance", for: .normal)
                     meetingAttendanceBtn.backgroundColor = .blue
                 }
+                meetingGameBtn.isEnabled = true
+                if CommunityService.instance.openMeeting.gameOpenTime != "" {
+                    //game opened
+                    meetingGameTimerLbl.isHidden = false
+                    let gameHost = CommunityService.instance.queryUser(UserID: CommunityService.instance.openMeeting.gameHost ?? "")
+                    if gameHost.id == UserDataService.instance.user.id {
+                        meetingGameLbl.text = "Game started by you"
+                    }
+                    meetingGameLbl.text = "Game started by \(gameHost.name ?? "")"
+                    meetingGameBtn.setTitle("End \(CommunityService.instance.openMeeting.gameTitle ?? "")", for: .normal)
+                }
+                if CommunityService.instance.openMeeting.gameCloseTime != "" {
+                    //gamed closed
+                    meetingGameLbl.text = ""
+                    meetingGameTimerLbl.text = ""
+                    meetingGameBtn.setTitle("Game Over", for: .normal)
+                    meetingGameBtn.backgroundColor = .darkGray
+                    meetingGameLbl.text = "Winner: \(CommunityService.instance.openMeeting.gameWinner ?? "")"
+                    meetingGameBtn.isEnabled = false
+                    self.gameTimer?.invalidate()
+                    meetingGameTimerLbl.isHidden = true
+                }
                 timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateElapsedTime), userInfo: nil, repeats: true)
+                gameTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateElapsedTime), userInfo: nil, repeats: true)
             } else {
                 meetingPrimaryActionBtn.setTitle("START MEETING", for: .normal)
                 self.timer?.invalidate()
+                self.gameTimer?.invalidate()
                 meetingClockLbl.isHidden = true
             }
         }
@@ -248,9 +282,8 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
         
     }
     
-    @objc func setupEventCreationRequestView() {
-        eventCreationRequestView.isHidden = !leader || CommunityService.instance.requestedAnEvent
-    }
+
+
     
     func setupMyPatrolView() {
         myPatrolView.isHidden = leader
@@ -309,11 +342,13 @@ class HomeVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSo
             self.performSegue(withIdentifier: "toCollectingAttendanceVC", sender: self)
         }
     }
+    
     @IBAction func onStartGameClick(_ sender: Any) {
-        
+        performSegue(withIdentifier: "toGameVC", sender: self)
     }
+    
     @IBAction func onDisbursePointsClick(_ sender: Any) {
-        
+        performSegue(withIdentifier: "toDisburseVC", sender: self)
     }
     
     
@@ -461,6 +496,11 @@ extension HomeVC {
             meetingClockLbl.text = elapsedTime
         } else {
             meetingClockLbl.text = "Invalid date"
+        }
+        if let elapsedTime = getElapsedTime(from: CommunityService.instance.openMeeting.gameOpenTime ?? "") {
+            meetingGameTimerLbl.text = elapsedTime
+        } else {
+            meetingGameTimerLbl.text = "Invalid date"
         }
     }
 
