@@ -52,7 +52,8 @@ class UserDataService {
                 let dateOfBirth = subvalue.value(forKey: "dateOfBirth") as? String ?? ""
                 let dash = subvalue.value(forKey: "dash") as? Int ?? 0
                 let score = subvalue.value(forKey: "score") as? Int ?? 0
-                
+                let FCM = subvalue.value(forKey: "FCM") as? String ?? ""
+
                 let commentsDict = subvalue.value(forKey: "comments") as? NSDictionary ?? NSDictionary()
                 for commentID in commentsDict.allKeys {
                     guard let subsubvalue = commentsDict.value(forKey: commentID as! String) as? NSDictionary else { return }
@@ -69,6 +70,7 @@ class UserDataService {
                                  phone: phone,
                                  dash: dash,
                                  gender: gender,
+                                 FCM: FCM,
                                  comments: comments,
                                  createdAt: createdAt)
                 completion(true)

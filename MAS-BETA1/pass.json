@@ -1,0 +1,68 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.com.mas-beta",
+  "serialNumber": "{{USER_ID}}",
+  "teamIdentifier": "3R383K938W",
+  "organizationName": "CHURCH OF ARCHANGEL MICHAEL",
+  "description": "hello",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "backgroundColor": "rgb(23, 24, 25)",
+  "labelColor": "rgb(255, 255, 255)",
+  "images": {
+    "logo": "logo.png"
+  },
+  "generic": {
+    "headerFields": [
+      {
+        "key": "header",
+        "label": "Header label",
+        "value": "Header Value"
+      }
+    ],
+    "primaryFields": [
+      {
+        "key": "name",
+        "label": "Member Name",
+        "value": "{{USER_NAME}}"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "member-id",
+        "label": "Member ID",
+        "value": "{{USER_ID}}"
+      },
+      {
+        "key": "date",
+        "label": "Date",
+        "value": "Event Date"
+      }
+    ],
+    "auxiliaryFields": [
+      {
+        "key": "additional",
+        "label": "Additional Info",
+        "value": "More details"
+      }
+    ],
+    "backFields": [
+      {
+        "key": "info",
+        "label": "Created At",
+        "value": "{{CREATED_AT}}"
+      }
+    ]
+  },
+  "barcode": {
+    "format": "PKBarcodeFormatQR",
+    "message": "{{QR_CODE_DATA}}",
+    "messageEncoding": "iso-8859-1"
+  },
+  "locations": [
+    {
+      "longitude": -122.3748889,
+      "latitude": 37.6189722
+    }
+  ],
+  "relevantDate": "2024-09-23T10:00-05:00"
+}

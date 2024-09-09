@@ -10,8 +10,8 @@ import FirebaseStorage
 import PDFKit
 import PassKit
 
-class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    
+class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate , PKAddPassesViewControllerDelegate {
+
     
     @IBOutlet weak var cvBtn: CircleButton!
     @IBOutlet weak var profile: CircleImageView!
@@ -32,7 +32,6 @@ class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewD
     let user = UserDataService.instance.user
     
     let badges = BadgeService.instance.badgeActivities
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -322,8 +321,52 @@ class ProfileVC: UIViewController, UICollectionViewDataSource, UICollectionViewD
     @IBAction func onScoutCVClick(_ sender: Any) {
         createScoutCV()
     }
+
+
     @IBAction func onPassClick(_ sender: Any) {
-      //  addWalletPassButtonTapped()
+        guard let pass = loadAndPreparePass() else {
+            print("Could not load the pass")
+            return
+        }
+        showPassInWallet(pass: pass, from: self)
     }
 
+    func loadAndPreparePass() -> PKPass? {
+        guard let passURL = Bundle.main.url(forResource: "pass", withExtension: "pkpass"),
+              let passData = try? Data(contentsOf: passURL) else {
+            print("Failed to load pass data")
+            return nil
+        }
+
+        do {
+            let pass = try PKPass(data: passData)
+            return pass
+        } catch let error as NSError {
+            print("Failed to create PKPass object: \(error.localizedDescription)")
+            if let underlyingError = error.userInfo[NSUnderlyingErrorKey] {
+                print("Underlying error: \(underlyingError)")
+            }
+            return nil
+        }
+    }
+
+
+    func showPassInWallet(pass: PKPass, from viewController: UIViewController) {
+        if let passController = PKAddPassesViewController(pass: pass) {
+            passController.delegate = self
+            viewController.present(passController, animated: true, completion: nil)
+        } else {
+            print("Cannot present pass controller; possibly due to an invalid pass")
+        }
+    }
+
+    // Optional: PKAddPassesViewControllerDelegate methods can be implemented here if needed.
+    func addPassesViewControllerDidFinish(_ controller: PKAddPassesViewController) {
+        controller.dismiss(animated: true, completion: nil)
+    }
+
+
+
 }
+
+

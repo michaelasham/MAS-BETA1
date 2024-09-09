@@ -213,7 +213,7 @@ class CollectingAttendanceVC: UIViewController, AVCaptureMetadataOutputObjectsDe
                         if CommunityService.instance.didMemberClockInBefore(user: user) {
                             triggerNotification(user: user, status: "repeat")
                         } else {
-                            CommunityService.instance.clockInMember(id: user.id) { Success in
+                            CommunityService.instance.clockInMember(id: user.id ?? "") { Success in
                                 if Success {
                                     self.triggerNotification(user: user, status: "ok")
                                 } else {

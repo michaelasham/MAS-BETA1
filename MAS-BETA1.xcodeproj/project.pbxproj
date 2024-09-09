@@ -53,10 +53,14 @@
 		4C5F03642C875EE300BD4242 /* GroupVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F03632C875EE300BD4242 /* GroupVC.swift */; };
 		4C5F03662C875EED00BD4242 /* MemberVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F03652C875EED00BD4242 /* MemberVC.swift */; };
 		4C5F03682C8773ED00BD4242 /* PushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5F03672C8773ED00BD4242 /* PushNotificationService.swift */; };
+		4CF385472C8E06CD007D896C /* GameVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF385462C8E06CD007D896C /* GameVC.swift */; };
+		4CF385492C8E0DF1007D896C /* GameScoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF385482C8E0DF1007D896C /* GameScoreCell.swift */; };
+		4CF3854B2C8E525A007D896C /* DisburseVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CF3854A2C8E525A007D896C /* DisburseVC.swift */; };
 		4CFEC67B2C23B56900D34246 /* PatrolScoreCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFEC67A2C23B56900D34246 /* PatrolScoreCell.swift */; };
 		4CFEC67D2C23B5C200D34246 /* GroupMemberCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFEC67C2C23B5C200D34246 /* GroupMemberCell.swift */; };
 		4CFEC67F2C23B64400D34246 /* EventCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFEC67E2C23B64400D34246 /* EventCell.swift */; };
 		6722A3E99982B6DF1643879F /* Pods_MAS_BETA1.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2055BEE7EBDB965DE6ACC81B /* Pods_MAS_BETA1.framework */; };
+		C7477E6C2C8E6115000BEAA1 /* pass.json in Resources */ = {isa = PBXBuildFile; fileRef = C7477E6B2C8E6115000BEAA1 /* pass.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -109,10 +113,16 @@
 		4C5F03632C875EE300BD4242 /* GroupVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupVC.swift; sourceTree = "<group>"; };
 		4C5F03652C875EED00BD4242 /* MemberVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberVC.swift; sourceTree = "<group>"; };
 		4C5F03672C8773ED00BD4242 /* PushNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationService.swift; sourceTree = "<group>"; };
+		4CF385462C8E06CD007D896C /* GameVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameVC.swift; sourceTree = "<group>"; };
+		4CF385482C8E0DF1007D896C /* GameScoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScoreCell.swift; sourceTree = "<group>"; };
+		4CF3854A2C8E525A007D896C /* DisburseVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisburseVC.swift; sourceTree = "<group>"; };
 		4CFEC67A2C23B56900D34246 /* PatrolScoreCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatrolScoreCell.swift; sourceTree = "<group>"; };
 		4CFEC67C2C23B5C200D34246 /* GroupMemberCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMemberCell.swift; sourceTree = "<group>"; };
 		4CFEC67E2C23B64400D34246 /* EventCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCell.swift; sourceTree = "<group>"; };
 		B37B9785A15514714B2BFB3E /* Pods-MAS-BETA1.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MAS-BETA1.debug.xcconfig"; path = "Target Support Files/Pods-MAS-BETA1/Pods-MAS-BETA1.debug.xcconfig"; sourceTree = "<group>"; };
+		C7477E692C8E5625000BEAA1 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
+		C7477E6B2C8E6115000BEAA1 /* pass.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = pass.json; path = ../../../../Desktop/pass.json; sourceTree = "<group>"; };
+		C7F453CB2C8D26F5002FDDE4 /* MAS-BETA1.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "MAS-BETA1.entitlements"; sourceTree = "<group>"; };
 		FE1596C3D8243B47A009D33A /* Pods-MAS-BETA1.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MAS-BETA1.release.xcconfig"; path = "Target Support Files/Pods-MAS-BETA1/Pods-MAS-BETA1.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -146,6 +156,8 @@
 				4C2A78C42C277DF50098FFBB /* CollectingAttendanceVC.swift */,
 				4C5F03632C875EE300BD4242 /* GroupVC.swift */,
 				4C5F03652C875EED00BD4242 /* MemberVC.swift */,
+				4CF385462C8E06CD007D896C /* GameVC.swift */,
+				4CF3854A2C8E525A007D896C /* DisburseVC.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -171,6 +183,7 @@
 		4C52CCBA2C21C43600646D7F /* MAS-BETA1 */ = {
 			isa = PBXGroup;
 			children = (
+				C7F453CB2C8D26F5002FDDE4 /* MAS-BETA1.entitlements */,
 				4C52CCEE2C21C65D00646D7F /* Constants.swift */,
 				4C52CCDD2C21C65C00646D7F /* Models */,
 				4C52CCD82C21C65C00646D7F /* Services */,
@@ -182,6 +195,8 @@
 				4C52CCC42C21C43800646D7F /* Assets.xcassets */,
 				4C52CCC62C21C43800646D7F /* LaunchScreen.storyboard */,
 				4C52CCC92C21C43800646D7F /* Info.plist */,
+				C7477E6B2C8E6115000BEAA1 /* pass.json */,
+				C7477E692C8E5625000BEAA1 /* logo.png */,
 				4C52CD142C21C77E00646D7F /* GoogleService-Info.plist */,
 			);
 			path = "MAS-BETA1";
@@ -272,6 +287,7 @@
 				4CFEC67E2C23B64400D34246 /* EventCell.swift */,
 				4C4F27262C245C8C00EB3690 /* PatrolMemberCell.swift */,
 				4C2A78C02C274C930098FFBB /* UpcomingEventCell.swift */,
+				4CF385482C8E0DF1007D896C /* GameScoreCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -344,6 +360,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C7477E6C2C8E6115000BEAA1 /* pass.json in Resources */,
 				4C52CCC52C21C43800646D7F /* Assets.xcassets in Resources */,
 				4C52CD152C21C77E00646D7F /* GoogleService-Info.plist in Resources */,
 				4C52CCC82C21C43800646D7F /* Base in Resources */,
@@ -408,6 +425,7 @@
 				4C4EF21E2C233BAA0032031E /* FullScreenVC.swift in Sources */,
 				4C5F03682C8773ED00BD4242 /* PushNotificationService.swift in Sources */,
 				4C52CD012C21C65D00646D7F /* EventVC.swift in Sources */,
+				4CF385472C8E06CD007D896C /* GameVC.swift in Sources */,
 				4CFEC67F2C23B64400D34246 /* EventCell.swift in Sources */,
 				4C52CCFC2C21C65D00646D7F /* Badge.swift in Sources */,
 				4C5F03642C875EE300BD4242 /* GroupVC.swift in Sources */,
@@ -420,6 +438,7 @@
 				4C52CCFF2C21C65D00646D7F /* User.swift in Sources */,
 				4C52CD092C21C65D00646D7F /* ProfileVC.swift in Sources */,
 				4C52CD0D2C21C65D00646D7F /* BadgeCell.swift in Sources */,
+				4CF3854B2C8E525A007D896C /* DisburseVC.swift in Sources */,
 				4C52CD1B2C21D51200646D7F /* MaterialCell.swift in Sources */,
 				4C52CD0E2C21C65D00646D7F /* BorderButton.swift in Sources */,
 				4C52CD112C21C65D00646D7F /* TicketCell.swift in Sources */,
@@ -428,6 +447,7 @@
 				4CFEC67D2C23B5C200D34246 /* GroupMemberCell.swift in Sources */,
 				4C52CCF82C21C65D00646D7F /* CommunityService.swift in Sources */,
 				4C4F27252C24367100EB3690 /* PatrolSortingVC.swift in Sources */,
+				4CF385492C8E0DF1007D896C /* GameScoreCell.swift in Sources */,
 				4C4F27272C245C8C00EB3690 /* PatrolMemberCell.swift in Sources */,
 				4C52CCF62C21C65D00646D7F /* AuthService.swift in Sources */,
 				4C52CCFB2C21C65D00646D7F /* UserDataService.swift in Sources */,
@@ -587,12 +607,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "MAS-BETA1/MAS-BETA1.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3R383K938W;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MAS-BETA1/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "To enhance your experience, this app uses the camera to capture photos and videos. We respect your privacy and do not store or share any media without your permission";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -618,12 +640,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "MAS-BETA1/MAS-BETA1.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3R383K938W;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "MAS-BETA1/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "To enhance your experience, this app uses the camera to capture photos and videos. We respect your privacy and do not store or share any media without your permission";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

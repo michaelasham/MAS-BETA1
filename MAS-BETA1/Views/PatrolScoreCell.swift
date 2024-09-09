@@ -19,36 +19,44 @@ class PatrolScoreCell: UICollectionViewCell {
     
     
     func setupView(patrol: Patrol) {
-        
+        print(patrol.score!)
         let group = CommunityService.instance.checkIfUserIsLeader()
         if group.id != "" {
             ptsLbl.isHidden = false
-            animateLabelChange(to: patrol.score)
+            animateLabelChange(to: patrol.score!)
         }
-        
+        print(patrol.score!)
+
         let colors: [UIColor] = [.systemBlue, .systemGreen, .systemRed, .systemOrange, .systemPurple]
         numeratorView.backgroundColor = colors.randomElement() ?? .systemGray
-        
+        print(patrol.score!)
+
         NSLayoutConstraint.activate([
             self.heightAnchor.constraint(equalToConstant: 300),
             self.widthAnchor.constraint(equalToConstant: 82)
         ])
-        
+        print(patrol.score!)
+
         titleLbl.text = patrol.name
         // Calculate maximum score
-        guard var maxScore = CommunityService.instance.patrols.compactMap({ $0.score }).max() else {
+        guard var maxScore = CommunityService.instance.patrols.compactMap({ $0.score! }).max() else {
             print("No scores found in patrols.")
             return
         }
-        maxScore = max(maxScore, patrol.score)
+        print(patrol.score!)
+
+        maxScore = max(maxScore, patrol.score!, 1)
         // Calculate height of view relative to DenominatorView
         let superHeight = denominatorView.bounds.height
-        let factor: CGFloat = superHeight / CGFloat(maxScore)
+        print(superHeight, CGFloat(abs(maxScore)))
+        let factor: CGFloat = superHeight / CGFloat(abs(maxScore))
         guard let score = patrol.score else {
             print("Patrol score is nil.")
             return
         }
-        let newHeight = CGFloat(score) * factor
+        print(patrol.score!)
+
+        let newHeight = CGFloat(patrol.score!) * factor
         // Create the view
         numeratorView.translatesAutoresizingMaskIntoConstraints = false
         numeratorView.layer.cornerRadius = numeratorView.bounds.width / 2  // Set corner radius based on width
@@ -64,15 +72,18 @@ class PatrolScoreCell: UICollectionViewCell {
         // Set final frame (height zero) and prepare for animation
         numeratorView.frame = initialFrame
         numeratorView.layer.cornerRadius = numeratorView.bounds.width / 2  // Adjust corner radius initially
-        
+        print(patrol.score!)
+
         // Calculate initial frame (growing upwards from bottom)
         
         // Animate the height change
+        print(finalFrame)
         UIView.animate(withDuration: 1.0) {
             self.numeratorView.frame = finalFrame
         }
-        self.score = patrol.score
+        self.score = patrol.score!
         self.currentHeight = newHeight
+        print(patrol.score!)
 
     }
     

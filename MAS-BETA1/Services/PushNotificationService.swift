@@ -18,7 +18,9 @@ class PushNotificationService {
     
 
     
-    
+    func pushFCM(token: String) {
+        ref.child("users").child(AuthService.instance.userID).updateChildValues(["FCM": token])
+    }
     
     
     func sendPushNotification(to token: String, title: String, body: String) {
